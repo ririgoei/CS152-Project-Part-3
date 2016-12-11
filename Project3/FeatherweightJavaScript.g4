@@ -48,18 +48,18 @@ stat: expr SEPARATOR                                    # bareExpr
     | IF '(' expr ')' block ELSE block                  # ifThenElse
     | IF '(' expr ')' block                             # ifThen
     | WHILE '(' expr ')' block                          # while
-    | PRINT '(' expr ')' SEPARATOR                      # print
+    | PRINT '(' expr ')' SEPARATOR                      # printExpr
     | SEPARATOR                                         # empty
     ;
 
 expr: expr op=( '*' | '/' | '%' ) expr                  # MulDivMod
     | expr op=( '+' | '-' ) expr                        # AddSub
     | expr op=( '<' | '<=' | '>' | '>=' | '==') expr    # compare
-    | FUNCTION parameter block                          # funcDec
-    | VAR ID op='=' expr                                # varDec
+    | FUNCTION parameter block                          # functionDeclrExpr
+    | VAR ID op='=' expr                                # varDeclrExpr
     | expr argument                                     # funcApp
     | ID                                                # varRef
-    | ID op='=' expr                                    # assign
+    | ID op='=' expr                                    # assignExpr
     | INT                                               # int
     | BOOL                                              # bool
     | NULL                                              # null
