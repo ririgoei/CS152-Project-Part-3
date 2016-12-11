@@ -72,8 +72,36 @@ class BinOpExpr implements Expression {
 
     @SuppressWarnings("incomplete-switch")
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = e1.evaluate(env);
+        Value b = e2.evaluate(env);
+        if (!((a instanceof IntVal) && (b instanceof IntVal)))
+            throw new RuntimeException();
+        int n1 = ((IntVal) a).toInt();
+        int n2 = ((IntVal) b).toInt();
+        switch (op) {
+            case ADD:
+                return new IntVal(n1 + n2);
+            case SUBTRACT:
+                return new IntVal(n1 - n2);
+            case MULTIPLY:
+                return new IntVal(n1 * n2);
+            case DIVIDE:
+                return new IntVal(n1 / n2);
+            case MOD:
+                return new IntVal(n1 % n2);
+            case GT:
+                return new BoolVal(n1 > n2);
+            case GE:
+                return new BoolVal(n1 >= n2);
+            case LT:
+                return new BoolVal(n1 < n2);
+            case LE:
+                return new BoolVal(n1 <= n2);
+            case EQ:
+                return new BoolVal(a.equals(b));
+            default:
+                return new NullVal();
+        }
     }
 }
 
@@ -91,8 +119,10 @@ class IfExpr implements Expression {
         this.els = els;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = cond.evaluate(env);
+        if (!(a instanceof BoolVal) || (!((((BoolVal) a).toBoolean() == true) || (((BoolVal) a).toBoolean() == false))))
+            throw new RuntimeException();
+        return ((BoolVal) a).toBoolean() ? thn.evaluate(env) : els.evaluate(env);
     }
 }
 
@@ -107,8 +137,14 @@ class WhileExpr implements Expression {
         this.body = body;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = cond.evaluate(env);
+        if (!(a instanceof BoolVal) || (!((((BoolVal) a).toBoolean() == true) || (((BoolVal) a).toBoolean() == false))))
+            throw new RuntimeException();
+        if(((BoolVal) a).toBoolean()) {
+            body.evaluate(env);
+            return (new WhileExpr(cond, body)).evaluate(env);
+        }
+        return new NullVal();
     }
 }
 
@@ -123,8 +159,11 @@ class SeqExpr implements Expression {
         this.e2 = e2;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = e1.evaluate(env);
+        Value b = e2.evaluate(env);
+        if(b == null || (new NullVal()).equals(b))
+            return a;
+        return b;
     }
 }
 
@@ -139,8 +178,10 @@ class VarDeclExpr implements Expression {
         this.exp = exp;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = exp.evaluate(env);
+        try { env.createVar(varName, a); }
+        catch (Exception e) { throw new RuntimeException(); }
+        return a;
     }
 }
 
@@ -157,8 +198,9 @@ class AssignExpr implements Expression {
         this.e = e;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = e.evaluate(env);
+        env.updateVar(varName, a);
+        return a;
     }
 }
 
@@ -173,8 +215,7 @@ class FunctionDeclExpr implements Expression {
         this.body = body;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        return new ClosureVal(params, body, env);
     }
 }
 
@@ -189,8 +230,16 @@ class FunctionAppExpr implements Expression {
         this.args = args;
     }
     public Value evaluate(Environment env) {
-        // YOUR CODE HERE
-        return null;
+        Value a = f.evaluate(env);
+        if (!(a instanceof ClosureVal) || a == null)
+            throw new RuntimeException();
+        Value b = new NullVal();
+        List<Value> valueList = new ArrayList<Value>();
+        for(int i = 0; i < args.size(); i++)
+            valueList.add((args.get(i)).evaluate(env));
+        try {
+            b = ((ClosureVal) a).apply(valueList);
+        } catch(Exception e) { throw new RuntimeException(); }
+        return b;
     }
 }
-
