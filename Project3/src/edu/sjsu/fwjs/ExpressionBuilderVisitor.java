@@ -138,7 +138,7 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
     
 
      @Override
-     public Expression visitFunctionDeclrExpr(FeatherweightJavaScriptParser.FunctionDeclExprContext ctx){
+     public Expression visitFunctionDeclrExpr(FeatherweightJavaScriptParser.FunctionDeclrExprContext ctx){
          List<String> params = new ArrayList<String>();
          for (int i=0; i<ctx.parameter().size(); i++) {
              String param = visit(ctx.parameter(i).getText());
@@ -197,7 +197,7 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
     @Override
     public Expression visitNull(FeatherweightJavaScriptParser.NullContext ctx){
         Object val = ctx.getText();
-        return new ValueExpr(new NullVal(val));
+        return new ValueExpr(null);
     }
     
     @Override

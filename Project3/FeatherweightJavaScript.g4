@@ -24,9 +24,9 @@ ADD       : '+' ;
 SUB       : '-' ;
 MOD       : '%' ;
 GT        : '>' ;
-GTE       : '>=' ;
+GE       : '>=' ;
 LT        : '<' ;
-LTE       : '<=' ;
+LE       : '<=' ;
 EQ        : '==' ;
 
 // Identifiers
