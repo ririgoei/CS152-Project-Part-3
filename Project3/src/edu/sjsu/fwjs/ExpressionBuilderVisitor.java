@@ -57,7 +57,7 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
         }
         return listToSeqExp(stmts);
     }
-    
+
      @Override
      public Expression visitEmpty(FeatherweightJavaScriptParser.EmptyContext ctx){
          return null;
@@ -69,34 +69,34 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
         Expression body = visit(ctx.block());
         return new WhileExpr(cond, body);
     }
-    
+
     @Override
     public Expression visitPrintExpr(FeatherweightJavaScriptParser.PrintExprContext ctx){
     	Expression expr = visit(ctx.expr());
     	return new PrintExpr(expr);
     }
-    
+
     @Override
     public Expression visitMulDivMod(FeatherweightJavaScriptParser.MulDivModContext ctx){
         Expression lhs = visit(ctx.expr(0));
         Expression rhs = visit(ctx.expr(1));
         return BinOpHelper(ctx.op.getType(), lhs, rhs);
     }
-    
+
     @Override
     public Expression visitAddSub(FeatherweightJavaScriptParser.AddSubContext ctx){
     	Expression lhs = visit(ctx.expr(0));
         Expression rhs = visit(ctx.expr(1));
         return BinOpHelper(ctx.op.getType(), lhs, rhs);
     }
-    
+
     @Override
     public Expression visitCompare(FeatherweightJavaScriptParser.CompareContext ctx){
     	Expression lhs = visit(ctx.expr(0));
         Expression rhs = visit(ctx.expr(1));
         return BinOpHelper(ctx.op.getType(), lhs, rhs);
     }
-    
+
     public Expression BinOpHelper(int ctxOp, Expression lhs, Expression rhs){
         Op op;
         switch(ctxOp) {
@@ -135,20 +135,19 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
         }
         return new BinOpExpr(op, lhs, rhs);
     }
-    
+
 
      @Override
      public Expression visitFunctionDeclrExpr(FeatherweightJavaScriptParser.FunctionDeclrExprContext ctx){
          List<String> params = new ArrayList<String>();
-         for (int i=0; i<ctx.parameter().size(); i++) {
-             String param = visit(ctx.parameter(i).getText());
+         for (int i = 0; i < ctx.getChildCount(); i++) {
+             String param = String.valueOf(ctx.getChild(i));
              if (param != null) params.add(param);
          }
        	Expression body = visit(ctx.block());
        	return new FunctionDeclExpr(params, body);
-
      }
-    
+
     @Override
     public Expression visitVarDeclrExpr(FeatherweightJavaScriptParser.VarDeclrExprContext ctx){
     	Expression expr = visit(ctx.expr());
@@ -160,46 +159,46 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
         return null;
 
     }
-    
+
     @Override
     public Expression visitFuncApp(FeatherweightJavaScriptParser.FuncAppContext ctx){
         Expression f = visit(ctx.expr());
         List<Expression> args = new ArrayList<Expression>();
-        
+
         for(int i = 1; i < ctx.getChildCount()-1; i++)
         {
             Expression exp = visit(ctx.getChild(i));
             args.add(exp);
         }
- 
-        return new FunctionAppExpr(f, args);    
+
+        return new FunctionAppExpr(f, args);
     }
-    
+
     @Override
     public Expression visitVarRef(FeatherweightJavaScriptParser.VarRefContext ctx){
     	String varName = ctx.ID().getText();
     	return new VarExpr(varName);
     }
-    
-    @Override 
+
+    @Override
     public Expression visitAssignExpr(FeatherweightJavaScriptParser.AssignExprContext ctx){
     	Expression expr = visit(ctx.expr());
     	String varName = ctx.ID().getText(); //String? ctx.getText()?
     	return new AssignExpr(varName, expr);
     }
-    
+
     @Override
     public Expression visitBool(FeatherweightJavaScriptParser.BoolContext ctx){
         boolean val = Boolean.valueOf(ctx.BOOL().getText());
         return new ValueExpr(new BoolVal(val));
     }
-    
+
     @Override
     public Expression visitNull(FeatherweightJavaScriptParser.NullContext ctx){
         Object val = ctx.getText();
         return new ValueExpr(null);
     }
-    
+
     @Override
     public Expression visitWithParam(FeatherweightJavaScriptParser.WithParamContext ctx){
         List<String> params = new ArrayList<String>();
@@ -208,12 +207,12 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
             if (param != null) params.add(param);
         }
         return new FunctionDeclExpr(params, null);    }
-    
+
     @Override
     public Expression visitEmptyParam(FeatherweightJavaScriptParser.EmptyParamContext ctx){
     	return null;
     }
-    
+
     @Override
     public Expression visitWithArg(FeatherweightJavaScriptParser.WithArgContext ctx){
         List<Expression> exprs = new ArrayList<Expression>();
@@ -223,12 +222,12 @@ public class ExpressionBuilderVisitor extends FeatherweightJavaScriptBaseVisitor
         }
         return new FunctionAppExpr(null, exprs);
     }
-    
+
     @Override
     public Expression visitEmptyArg(FeatherweightJavaScriptParser.EmptyArgContext ctx){
     	return null;
     }
-    
+
     /**
      * Converts a list of expressions to one sequence expression,
      * if the list contained more than one expression.
