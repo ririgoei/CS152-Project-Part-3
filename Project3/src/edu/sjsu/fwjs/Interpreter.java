@@ -1,44 +1,31 @@
 package edu.sjsu.fwjs;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import edu.sjsu.fwjs.parser.FeatherweightJavaScriptLexer;
+import edu.sjsu.fwjs.parser.FeatherweightJavaScriptParser;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class Interpreter {
 
     public static void main(String[] args) throws Exception {
-        //Expression prog = new BinOpExpr(Op.ADD, new ValueExpr(new IntVal(3)), new ValueExpr(new IntVal(4)));
+        String inputFile = null;
+        if (args.length>0) inputFile = args[0];
+        InputStream is = System.in;
+        if (inputFile!=null) is = new FileInputStream(inputFile);
 
+        ANTLRInputStream input = new ANTLRInputStream(is);
+        FeatherweightJavaScriptLexer lexer = new FeatherweightJavaScriptLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        FeatherweightJavaScriptParser parser = new FeatherweightJavaScriptParser(tokens);
+        ParseTree tree = parser.prog(); // parse
 
-        // x=112358; (function() { x=42; x; })(); x;
-        Environment env = new Environment();
-        // SeqExpr seq = new SeqExpr(
-        //     new SeqExpr(
-        //         new VarDeclExpr("x", new ValueExpr(new IntVal(112358))),
-        //         new FunctionAppExpr(
-        //             new FunctionDeclExpr(
-        //                 new ArrayList<String>(),
-        //                 new SeqExpr(
-        //                     new AssignExpr("x", new ValueExpr(new IntVal(42))),
-        //                     new VarExpr("x")
-        //                 )
-        //             ), new ArrayList<Expression>()
-        //         )
-        //     ),
-        //     new VarExpr("x")
-        // );
-        // Value v = seq.evaluate(env);
-        Value z = (new VarDeclExpr("x", new ValueExpr(new IntVal(112358)))).evaluate(env);
-        System.out.println(z.toString());
-        Value v = (new FunctionAppExpr(
-                    new FunctionDeclExpr(
-                        new ArrayList<String>(),
-                        new SeqExpr(
-                            new AssignExpr("x", new ValueExpr(new IntVal(42))),
-                            new VarExpr("x")
-                        )
-                    ), new ArrayList<Expression>()
-                )).evaluate(env);
-        System.out.println(v.toString());
-        System.out.println(env.toString());
-        //System.out.println("'3 + 4;' evaluates to " + prog.evaluate(new Environment()));
+        ExpressionBuilderVisitor builder = new ExpressionBuilderVisitor();
+        Expression prog = builder.visit(tree);
+        prog.evaluate(new Environment());
     }
+
 }
